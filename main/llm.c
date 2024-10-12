@@ -1,8 +1,8 @@
 /* Inference for Llama-2 Transformer model in pure C */
 /**
  * Original author of this:
- * https://github.com/karpathy/llama2.c 
- * 
+ * https://github.com/karpathy/llama2.c
+ *
  * Slight modifications added to make it ESP32 friendly
  */
 
@@ -307,8 +307,10 @@ void matmul_task(void *params)
             {
                 v4sf val = 0.0f;
                 v4sf *row = &p->w[i * p->n]; // Pointer to the start of the current row in matrix w
-                dsps_dotprod_f32_aes3(row, p->x, &val, p->n);
+                dsps_dotprod_f32(row, p->x, &val, p->n);
                 p->xout[i] = val;
+                // delay to avoid watchdog timer
+                vTaskDelay(xDelay);
             }
             //    ESP_LOGI(TAG, "Completed task %s", tName);
             xSemaphoreGive(semaDataReady);
@@ -371,6 +373,8 @@ void forward_task(void *params)
                         xb[i] += a * v[i];
                     }
                 }
+                // delay to avoid watchdog timer
+                vTaskDelay(xDelay);
             }
             //   ESP_LOGI(TAG, "Completed task %s", tName);
             xSemaphoreGive(semaForwardDataReady);
@@ -391,7 +395,7 @@ void matmul(v4sf *xout, v4sf *x, v4sf *w, int n, int d)
     {
         v4sf val = 0.0f;
         v4sf *row = &w[i * n]; // Pointer to the start of the current row in matrix w
-        dsps_dotprod_f32_aes3(row, x, &val, n);
+        dsps_dotprod_f32(row, x, &val, n);
         xout[i] = val;
     }
     if (xSemaphoreTake(semaDataReady, portMAX_DELAY) == pdTRUE)

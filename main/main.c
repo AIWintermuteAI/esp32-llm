@@ -15,8 +15,8 @@
 static const char *TAG = "MAIN";
 u8g2_t u8g2;
 
-#define PIN_SDA 8
-#define PIN_SCL 9
+#define PIN_SDA 21
+#define PIN_SCL 22
 #define OLED_I2C_ADDRESS 0x78
 
 /**
@@ -47,7 +47,7 @@ void init_display(void)
 
 /**
  * @brief intializes SPIFFS storage
- * 
+ *
  */
 void init_storage(void)
 {
@@ -93,7 +93,7 @@ void init_storage(void)
 
 /**
  * @brief Outputs to display
- * 
+ *
  * @param text The text to output
  */
 void write_display(char *text)
@@ -105,19 +105,19 @@ void write_display(char *text)
 
 /**
  * @brief Callbacks once generation is done
- * 
+ *
  * @param tk_s The number of tokens per second generated
  */
 void generate_complete_cb(float tk_s)
 {
     char buffer[50];
     sprintf(buffer, "%.2f tok/s", tk_s);
-    write_display(&buffer);
+    //write_display(&buffer);
 }
 
 /**
  * @brief Draws a llama onscreen
- * 
+ *
  */
 void draw_llama(void)
 {
@@ -127,8 +127,8 @@ void draw_llama(void)
 
 void app_main(void)
 {
-    init_display();
-    write_display("Loading Model");
+    //init_display();
+    //write_display("Loading Model");
     init_storage();
 
     // default parameters
@@ -136,8 +136,8 @@ void app_main(void)
     char *tokenizer_path = "/data/tok512.bin";
     float temperature = 1.0f;        // 0.0 = greedy deterministic. 1.0 = original. don't set higher
     float topp = 0.9f;               // top-p in nucleus sampling. 1.0 = off. 0.9 works well, but slower
-    int steps = 256;                 // number of steps to run for
-    char *prompt = NULL;             // prompt string
+    int steps = 64;                 // number of steps to run for
+    char *prompt = "Lily met Shoggoth and went";             // prompt string
     unsigned long long rng_seed = 0; // seed rng with time by default
 
     // parameter validation/overrides
@@ -160,6 +160,6 @@ void app_main(void)
     build_sampler(&sampler, transformer.config.vocab_size, temperature, topp, rng_seed);
 
     // run!
-    draw_llama();
+    //draw_llama();
     generate(&transformer, &tokenizer, &sampler, prompt, steps, &generate_complete_cb);
 }
